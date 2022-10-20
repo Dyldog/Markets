@@ -1,0 +1,32 @@
+{
+  "pins" : [
+    {
+      "identity" : "arqit",
+      "kind" : "remoteSourceControl",
+      "location" : "https://bitbucket.org/outware/arqit.git",
+      "state" : {
+        "branch" : "feature/api-mocks",
+        "revision" : "055e2e973c43446a68d0bf9d3dcd62dc278ef583"
+      }
+    },
+    {
+      "identity" : "textview",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/kenmueller/TextView",
+      "state" : {
+        "branch" : "master",
+        "revision" : "06e6939ae4da03565889928cca65647f05fd2d67"
+      }
+    },
+    {
+      "identity" : "wkview",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/rebeloper/WKView",
+      "state" : {
+        "revision" : "b9314678cf946e8c02ae1dcaf4e07d6c9dd7712c",
+        "version" : "0.1.6"
+      }
+    }
+  ],
+  "version" : 2
+}
