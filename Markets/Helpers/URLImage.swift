@@ -38,18 +38,19 @@ struct URLImage: View {
     let url: String
     let placeholder: String
     
-    @ObservedObject var imageLoader = ImageLoader()
+    @StateObject var imageLoader:ImageLoader
     
     init(url: String, placeholder: String = "placeholder") {
         self.url = url
         self.placeholder = placeholder
-        self.imageLoader.downloadImage(url: self.url)
+        self._imageLoader = .init(wrappedValue: .init())
     }
     
     var body: some View {
         if let data = self.imageLoader.downloadedData {
             return Image(uiImage: UIImage(data: data)!).resizable().scaledToFit()
         } else {
+            imageLoader.downloadImage(url: self.url)
             return Image("placeholder").resizable().scaledToFit()
         }
     }
