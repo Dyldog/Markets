@@ -26,6 +26,10 @@
 		FC825D402B08CB5B00067AF4 /* MarketplaceSearchResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC825D3F2B08CB5B00067AF4 /* MarketplaceSearchResponse.swift */; };
 		FC825D432B08CB7A00067AF4 /* StringMappable.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC825D422B08CB7A00067AF4 /* StringMappable.swift */; };
 		FC825D4B2B08E07400067AF4 /* Facebook.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC825D4A2B08E07400067AF4 /* Facebook.swift */; };
+		FCC2CF182B09F0010064C29E /* AlertsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC2CF172B09F0010064C29E /* AlertsView.swift */; };
+		FCC2CF1B2B09F0CD0064C29E /* CardStack in Frameworks */ = {isa = PBXBuildFile; productRef = FCC2CF1A2B09F0CD0064C29E /* CardStack */; };
+		FCC2CF1D2B09F1760064C29E /* MarketplaceItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC2CF1C2B09F1760064C29E /* MarketplaceItemView.swift */; };
+		FCC2CF1F2B09F3B00064C29E /* AlertConfigView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCC2CF1E2B09F3B00064C29E /* AlertConfigView.swift */; };
 		FCE5FCAE2B09776800B21886 /* EmptyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCE5FCAD2B09776800B21886 /* EmptyView.swift */; };
 		FCE5FCB42B09A44200B21886 /* DylKit in Frameworks */ = {isa = PBXBuildFile; productRef = FCE5FCB32B09A44200B21886 /* DylKit */; };
 		FCE5FCB72B09AC8F00B21886 /* WrappingHStack in Frameworks */ = {isa = PBXBuildFile; productRef = FCE5FCB62B09AC8F00B21886 /* WrappingHStack */; };
@@ -74,6 +78,9 @@
 		FC825D3F2B08CB5B00067AF4 /* MarketplaceSearchResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarketplaceSearchResponse.swift; sourceTree = "<group>"; };
 		FC825D422B08CB7A00067AF4 /* StringMappable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringMappable.swift; sourceTree = "<group>"; };
 		FC825D4A2B08E07400067AF4 /* Facebook.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Facebook.swift; sourceTree = SOURCE_ROOT; };
+		FCC2CF172B09F0010064C29E /* AlertsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertsView.swift; sourceTree = "<group>"; };
+		FCC2CF1C2B09F1760064C29E /* MarketplaceItemView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarketplaceItemView.swift; sourceTree = "<group>"; };
+		FCC2CF1E2B09F3B00064C29E /* AlertConfigView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertConfigView.swift; sourceTree = "<group>"; };
 		FCE5FCAD2B09776800B21886 /* EmptyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmptyView.swift; sourceTree = "<group>"; };
 		FCE5FCBB2B09DF9000B21886 /* Secrets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Secrets.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -84,6 +91,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				FCE5FCBA2B09B91000B21886 /* NavigationSearchBar in Frameworks */,
+				FCC2CF1B2B09F0CD0064C29E /* CardStack in Frameworks */,
 				FCE5FCB72B09AC8F00B21886 /* WrappingHStack in Frameworks */,
 				FCE5FCB42B09A44200B21886 /* DylKit in Frameworks */,
 			);
@@ -187,6 +195,7 @@
 			isa = PBXGroup;
 			children = (
 				1116C6752900DF0B00E08B04 /* ContentView.swift */,
+				FCC2CF1C2B09F1760064C29E /* MarketplaceItemView.swift */,
 				FCE5FCAD2B09776800B21886 /* EmptyView.swift */,
 				FC7CD8952B08344A00D1D83F /* ViewModel.swift */,
 			);
@@ -196,6 +205,7 @@
 		FC825D452B08CB9A00067AF4 /* Screens */ = {
 			isa = PBXGroup;
 			children = (
+				FCC2CF162B09EFF20064C29E /* Alerts */,
 				FC825D442B08CB8F00067AF4 /* Search */,
 			);
 			path = Screens;
@@ -233,6 +243,15 @@
 			path = Extensions;
 			sourceTree = "<group>";
 		};
+		FCC2CF162B09EFF20064C29E /* Alerts */ = {
+			isa = PBXGroup;
+			children = (
+				FCC2CF172B09F0010064C29E /* AlertsView.swift */,
+				FCC2CF1E2B09F3B00064C29E /* AlertConfigView.swift */,
+			);
+			path = Alerts;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -253,6 +272,7 @@
 				FCE5FCB32B09A44200B21886 /* DylKit */,
 				FCE5FCB62B09AC8F00B21886 /* WrappingHStack */,
 				FCE5FCB92B09B91000B21886 /* NavigationSearchBar */,
+				FCC2CF1A2B09F0CD0064C29E /* CardStack */,
 			);
 			productName = Markets;
 			productReference = 1116C6702900DF0B00E08B04 /* Markets.app */;
@@ -330,6 +350,7 @@
 				FCE5FCB22B09A44200B21886 /* XCLocalSwiftPackageReference "../DylKit" */,
 				FCE5FCB52B09AC8F00B21886 /* XCRemoteSwiftPackageReference "WrappingHStack" */,
 				FCE5FCB82B09B91000B21886 /* XCRemoteSwiftPackageReference "NavigationSearchBar" */,
+				FCC2CF192B09F0CD0064C29E /* XCRemoteSwiftPackageReference "SwiftUI-CardStackView" */,
 			);
 			productRefGroup = 1116C6712900DF0B00E08B04 /* Products */;
 			projectDirPath = "";
@@ -375,6 +396,7 @@
 			files = (
 				FC825D432B08CB7A00067AF4 /* StringMappable.swift in Sources */,
 				FCE5FCBC2B09DF9000B21886 /* Secrets.swift in Sources */,
+				FCC2CF1D2B09F1760064C29E /* MarketplaceItemView.swift in Sources */,
 				FCE5FCAE2B09776800B21886 /* EmptyView.swift in Sources */,
 				FC7CD8962B08344A00D1D83F /* ViewModel.swift in Sources */,
 				1116C6762900DF0B00E08B04 /* ContentView.swift in Sources */,
@@ -383,10 +405,12 @@
 				FC7CD8982B0835A900D1D83F /* WebView.swift in Sources */,
 				FC825D382B08CAFD00067AF4 /* URL+Identifiable.swift in Sources */,
 				FC7CD89A2B083E5F00D1D83F /* WKWebview+SaveCookies.swift in Sources */,
+				FCC2CF1F2B09F3B00064C29E /* AlertConfigView.swift in Sources */,
 				FC825D362B08CAEC00067AF4 /* MarketplaceRequest.swift in Sources */,
 				FC825D3E2B08CB3500067AF4 /* WKWebsiteDataStore+Cookie.swift in Sources */,
 				FC825D402B08CB5B00067AF4 /* MarketplaceSearchResponse.swift in Sources */,
 				1116C6742900DF0B00E08B04 /* MarketsApp.swift in Sources */,
+				FCC2CF182B09F0010064C29E /* AlertsView.swift in Sources */,
 				FC825D3A2B08CB1000067AF4 /* MarketplaceItem.swift in Sources */,
 				FC7CD8942B08293E00D1D83F /* APIClient.swift in Sources */,
 			);
@@ -724,6 +748,14 @@
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		FCC2CF192B09F0CD0064C29E /* XCRemoteSwiftPackageReference "SwiftUI-CardStackView" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/dadalar/SwiftUI-CardStackView";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.0.6;
+			};
+		};
 		FCE5FCB52B09AC8F00B21886 /* XCRemoteSwiftPackageReference "WrappingHStack" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/dkk/WrappingHStack";
@@ -743,6 +775,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		FCC2CF1A2B09F0CD0064C29E /* CardStack */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = FCC2CF192B09F0CD0064C29E /* XCRemoteSwiftPackageReference "SwiftUI-CardStackView" */;
+			productName = CardStack;
+		};
 		FCE5FCB32B09A44200B21886 /* DylKit */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = DylKit;

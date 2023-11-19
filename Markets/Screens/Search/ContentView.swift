@@ -12,36 +12,16 @@ import DylKit
 import NavigationSearchBar
 
 struct ContentView: View {
-    @State var urlToShow: URL?
-    @StateObject var viewModel: ViewModel = .init()
+    @ObservedObject var viewModel: ViewModel
     @Environment(\.isSearching) private var isSearching: Bool
     
     var content: some View {
         LazyVGrid(columns: Array(repeating: GridItem(.flexible(), alignment: .top), count: 3)) {
             ForEach(Array(viewModel.items.enumerated()), id: \.element.id) { (index, item) in
                 Button {
-                    urlToShow = item.marketplaceURL
+                    viewModel.urlToShow = item.marketplaceURL
                 } label: {
-                    VStack {
-                        ZStack {
-                            URLImage(url: item.imageURL.absoluteString)
-                                .cornerRadius(8)
-                            CornerStack(corner: .bottomRight) {
-                                Text(item.price.replacingWholeMatch("$0.00", with: "FREE"))
-                                    .font(.footnote.bold())
-                                    .foregroundStyle(.white)
-                                    .padding(2)
-                                    .roundedBackground(
-                                        radius: 8,
-                                        color: item.price == "$0.00" ? .green : .red
-                                    )
-                            }
-                        }
-                        Text(item.title)
-                            .font(.system(size: 12, weight: .bold))
-                            .multilineTextAlignment(.center)
-                        Spacer()
-                    }
+                    MarketplaceItemView(item: item)
                 }
                 .buttonStyle(PlainButtonStyle())
                 .onAppear {
@@ -59,12 +39,7 @@ struct ContentView: View {
                 }
             }
             
-            content.sheet(item: $urlToShow, content: { url in
-                WebView(url: url) { webview in
-                    webview.saveCookies()
-                }
-            })
-            .sheet(isPresented: $viewModel.showLogin, content: {
+            content.sheet(isPresented: $viewModel.showLogin, content: {
                 WebView(url: .init(string: "https://www.facebook.com")!) {
                     viewModel.loginWebviewLoaded($0)
                 }
@@ -107,13 +82,5 @@ struct ContentView: View {
                 }
             }
         }
-    }
-}
-
-
-
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        ContentView()
     }
 }

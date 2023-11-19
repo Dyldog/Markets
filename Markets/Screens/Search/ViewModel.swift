@@ -9,9 +9,12 @@ import Foundation
 import Combine
 import WebKit
 import DylKit
+import CardStack
 
 enum DefaultKeys: String, DefaultsKey {
     case pastSearches = "PAST_SEARCHES"
+    case alerts = "MARKETPLACE_ALERTS"
+    case seenAlerts = "SEEN_ALERTS"
 }
 
 class ViewModel: NSObject, ObservableObject {
@@ -26,6 +29,8 @@ class ViewModel: NSObject, ObservableObject {
         return formatter
     }()
     
+    
+    @Published var urlToShow: URL?
     @Published var alert: Alert?
     @Published var showLogin: Bool = false
     @Published private var cookie: String?
@@ -35,6 +40,14 @@ class ViewModel: NSObject, ObservableObject {
     
     @Published var items: [MarketplaceItem] = []
     @Published private var _searchText: String = ""
+    
+    @Published var showAlertConfig: Bool = false
+    @Published var alertItems: [MarketplaceItem] = []
+    private(set) var alertCancellables: Set<AnyCancellable> = .init()
+    @UserDefaultable(key: DefaultKeys.alerts) private(set) var alerts: [MarketplaceAlert] = []
+    @UserDefaultable(key: DefaultKeys.seenAlerts) private var seenAlerts: [String] = []
+    var badgeCount: Int { alertItems.filter { !seenAlerts.contains($0.id) }.count }
+    
     var searchText: String {
         get { _searchText }
         set {
@@ -47,13 +60,34 @@ class ViewModel: NSObject, ObservableObject {
     
     override init() {
         super.init()
-        
-//        publisher(for: \.searchText)
-//            .throttle(for: 1.0, scheduler: RunLoop.main, latest: true)
-////            .receive(on: RunLoop.main)
-//            .sink { [weak self] in
-//                self?.search(for: $0, page: 0)
-//            }.store(in: &cancellables)
+    }
+    
+    func getAlertItems() {
+        self.alertItems = []
+        onBG {
+            self.alerts.forEach {
+                self.getItems(for: $0.query, freeOnly: $0.onlyFree, page: nil)?
+                    .sink(receiveCompletion: { completion in
+                        switch completion {
+                        case .failure(let error): print("ERROR:", error.localizedDescription)
+                        case .finished: break
+                        }
+                    }, receiveValue: { (items, _) in
+                        let newAlerts: [MarketplaceItem] = items.filter {
+                            guard let id = $0.listing?.id else { return false }
+                            return !self.seenAlerts.contains(id)
+                        }.compactMap {
+                            guard let listing = $0.listing else { return nil }
+                            return self.item(from: listing)
+                        }
+                        
+                        onMain {
+                            self.alertItems = (self.alertItems + newAlerts).unique
+                        }
+                    })
+                    .store(in: &self.alertCancellables)
+            }
+        }
     }
     
     func onAppear() {
@@ -63,6 +97,7 @@ class ViewModel: NSObject, ObservableObject {
             DispatchQueue.main.async {
                 self.cookie = cookie
                 self.showLogin = self.cookie == nil
+                self.getAlertItems()
             }
         }
     }
@@ -77,16 +112,23 @@ class ViewModel: NSObject, ObservableObject {
         pastSearches = ([query] + pastSearches).unique
     }
     
+    private func item(from listing: MarketplaceSearchResponse.Listing) -> MarketplaceItem {
+        return .init(
+            facebookID: listing.id,
+            title: listing.marketplace_listing_title,
+            price: self.currencyFormatter.string(from: listing.listing_price.amount.mapped as NSNumber) ?? "ERROR",
+            imageURL: listing.primary_listing_photo.image.uri
+        )
+    }
+    
     func search(for query: String, page: MarketplaceSearchResponse.PageInfo?) {
         guard !query.isEmpty else { items = []; return }
         
-        guard let cookie = cookie else { return }
-        
         nextPageInfo = page
         searchRequest?.cancel()
-        
         isLoading = true
-        searchRequest = client.makeRequest(MarketplaceRequest.search(query, page: page, cookie: cookie), for: MarketplaceSearchResponse.self)
+        
+        searchRequest = getItems(for: query, freeOnly: showFreeOnly, page: page)?
             .receive(on: RunLoop.main).sink { completion in
             switch completion {
             case .finished:
@@ -96,23 +138,16 @@ class ViewModel: NSObject, ObservableObject {
                 self.alert = .init(title: "Error searching", message: error.localizedDescription)
             }
         } receiveValue: { response in
-            let data = response.data.marketplace_search.feed_units
-            self.nextPageInfo = data.page_info
-            let items: [MarketplaceItem] = data.edges.compactMap {
-                $0.node.listing
-            }
-            .if(self.showFreeOnly) { items in items.filter { $0.listing_price.amount.mapped == 0 }  }
-            .sorted { $0.listing_price.amount.mapped < $1.listing_price.amount.mapped }.map {
-                .init(
-                    facebookID: $0.id,
-                    title: $0.marketplace_listing_title,
-                    price: self.currencyFormatter.string(from: $0.listing_price.amount.mapped as NSNumber) ?? "ERROR",
-                    imageURL: $0.primary_listing_photo.image.uri
-                )
-            }
+            self.nextPageInfo = response.1
+            let items: [MarketplaceItem] = response.0
+                .compactMap { $0.listing }
+                .if(self.showFreeOnly) { items in items.filter { $0.listing_price.amount.mapped == 0 }  }
+                .sorted { $0.listing_price.amount.mapped < $1.listing_price.amount.mapped }.map {
+                    self.item(from: $0)
+                }
             
-            let isLastPage = data.edges.contains(where: {
-                $0.node.__typename == "MarketplaceSearchFeedEndOfResults"
+            let isLastPage = response.0.contains(where: {
+                $0.__typename == "MarketplaceSearchFeedEndOfResults"
             })
             
             if items.count == 0, !isLastPage {
@@ -123,6 +158,25 @@ class ViewModel: NSObject, ObservableObject {
                 self.items += items
             }
         }
+    }
+    
+    private func getItems(for query: String, freeOnly: Bool, page: MarketplaceSearchResponse.PageInfo?) -> AnyPublisher<([MarketplaceSearchResponse.Node], MarketplaceSearchResponse.PageInfo), APIError>? {
+        guard let cookie = cookie else { return nil }
+        
+        return client.makeRequest(
+            MarketplaceRequest.search(query, page: page, cookie: cookie), for: MarketplaceSearchResponse.self
+        ).map {
+            (
+                $0.data.marketplace_search.feed_units.edges.map { $0.node },
+                $0.data.marketplace_search.feed_units.page_info
+            )
+        }.map {
+            if freeOnly {
+                ($0.0.filter { i in i.listing?.listing_price.amount.mapped == 0 }, $0.1)
+            } else {
+                $0
+            }
+        }.eraseToAnyPublisher()
     }
     
     private func loadNextPage() {
@@ -138,5 +192,17 @@ class ViewModel: NSObject, ObservableObject {
     func showFreeTapped() {
         showFreeOnly.toggle()
         search(for: searchText, page: nil)
+    }
+    
+    func alertSwiped(_ alert: MarketplaceItem, direction: LeftRight) {
+        objectWillChange.send()
+        seenAlerts.append(alert.id)
+        
+        switch direction {
+        case .left: 
+            break
+        case .right:
+            urlToShow = alert.marketplaceURL
+        }
     }
 }

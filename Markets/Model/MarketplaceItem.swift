@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct MarketplaceItem: Identifiable {
+struct MarketplaceItem: Identifiable, Equatable {
     var id: String { facebookID }
     let facebookID: String
     let title: String
