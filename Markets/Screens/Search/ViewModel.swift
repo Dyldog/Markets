@@ -62,6 +62,13 @@ class ViewModel: NSObject, ObservableObject {
         super.init()
     }
     
+    private func login() {
+        onMain {
+            self.cookie = nil
+            self.showLogin = true
+        }
+    }
+    
     func getAlertItems() {
         self.alertItems = []
         onBG {
@@ -69,7 +76,11 @@ class ViewModel: NSObject, ObservableObject {
                 self.getItems(for: $0.query, freeOnly: $0.onlyFree, page: nil)?
                     .sink(receiveCompletion: { completion in
                         switch completion {
-                        case .failure(let error): print("ERROR:", error.localizedDescription)
+                        case .failure(let error):
+                            switch error {
+                            case .notAuthenticated: self.login()
+                            default:  print("ERROR:", error.localizedDescription)
+                            }
                         case .finished: break
                         }
                     }, receiveValue: { (items, _) in
@@ -128,6 +139,10 @@ class ViewModel: NSObject, ObservableObject {
         searchRequest?.cancel()
         isLoading = true
         
+        if page == nil {
+            items = []
+        }
+        
         searchRequest = getItems(for: query, freeOnly: showFreeOnly, page: page)?
             .receive(on: RunLoop.main).sink { completion in
             switch completion {
@@ -135,7 +150,10 @@ class ViewModel: NSObject, ObservableObject {
                 self.addPastSearch(query)
                 self.isLoading = false
             case let .failure(error):
-                self.alert = .init(title: "Error searching", message: error.localizedDescription)
+                switch error {
+                case .notAuthenticated: self.login()
+                default: self.alert = .init(title: "Error searching", message: error.localizedDescription)
+                }
             }
         } receiveValue: { response in
             self.nextPageInfo = response.1
@@ -161,7 +179,7 @@ class ViewModel: NSObject, ObservableObject {
     }
     
     private func getItems(for query: String, freeOnly: Bool, page: MarketplaceSearchResponse.PageInfo?) -> AnyPublisher<([MarketplaceSearchResponse.Node], MarketplaceSearchResponse.PageInfo), APIError>? {
-        guard let cookie = cookie else { return nil }
+        guard let cookie = cookie else { login(); return nil }
         
         return client.makeRequest(
             MarketplaceRequest.search(query, page: page, cookie: cookie), for: MarketplaceSearchResponse.self

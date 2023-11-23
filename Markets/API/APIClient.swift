@@ -7,6 +7,7 @@
 
 import Foundation
 import Combine
+import DylKit
 
 enum HTTPMethod: String {
     case get = "GET"
@@ -41,14 +42,24 @@ extension APIRequest {
     }
 }
 
-enum APIError: Error {
-    case internetBroke
-    case couldntDecode
+protocol LocalizedDescriptionError: Error {
+    var localizedDescription: String { get }
+}
+
+enum APIError: LocalizedDescriptionError {
+    case couldntDecode(String, DecodingError)
+    case notAuthenticated
     case unknown
     
-    init(_ decodingError: DecodingError) {
-        switch decodingError {
-        default: self = .couldntDecode
+    var localizedDescription: String {
+        switch self {
+        case .notAuthenticated: return "Not authenticated"
+        case let .couldntDecode(string, error): return """
+        \(error.localizedDescription)
+        
+        \(string)
+        """
+        case .unknown: return "Unknown error"
         }
     }
 }
@@ -56,12 +67,21 @@ enum APIError: Error {
 class APIClient {
     func makeRequest<T: Decodable>(_ request: APIRequest, for type: T.Type) -> AnyPublisher<T, APIError> {
         URLSession.shared.dataTaskPublisher(for: request.request).tryMap { data, response in
-            let value = try JSONDecoder().decode(type, from: data)
-            return value
+            do {
+                let value = try JSONDecoder().decode(type, from: data)
+                return value
+            } catch {
+                if data.string.contains("Please try closing and re-opening your browser") {
+                    throw APIError.notAuthenticated
+                } else if let decodingError = error as? DecodingError {
+                    throw APIError.couldntDecode(data.string, decodingError)
+                } else {
+                    throw error
+                }
+            }
         }.mapError {
             switch $0 {
             case let apiError as APIError: return apiError
-            case let decodingError as DecodingError: return .init(decodingError)
             default: return .unknown
             }
         }

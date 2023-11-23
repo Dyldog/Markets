@@ -24,12 +24,11 @@ struct AppView: View {
                 Label("Alerts", systemImage: "exclamationmark.bubble")
             }
             .badge(viewModel.badgeCount)
-            .sheet(item: $viewModel.urlToShow, content: { url in
-                WebView(url: url) { webview in
-                    webview.saveCookies()
-                }
-            })
-        }
+        }.sheet(item: $viewModel.urlToShow, content: { url in
+            WebView(url: url) { webview in
+                webview.saveCookies()
+            }
+        })
     }
 }
 @main
