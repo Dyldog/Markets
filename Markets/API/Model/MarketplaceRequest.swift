@@ -45,8 +45,8 @@ enum MarketplaceRequest: APIRequest {
             __user=\(cookie.values["c_user"]!)
             __a=1
             __req=j
-            __csr=\(Secrets.Facebook.csr)
-            fb_dtsg=\(Secrets.Facebook.fb_dtsg)
+            __csr=\(Secrets.csr.value)
+            fb_dtsg=\(Secrets.fb_dtsg.value)
             """
             .replacingOccurrences(of: "\n", with: "&")
         }

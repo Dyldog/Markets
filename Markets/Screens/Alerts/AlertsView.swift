@@ -11,6 +11,7 @@ import DylKit
 
 struct AlertsView: View {
     @ObservedObject var viewModel: ViewModel
+    @State var showSettings: Bool = false
     
     func icon(for direction: LeftRight?) -> AnyView? {
         func view(name: String, color: Color) -> AnyView {
@@ -73,10 +74,19 @@ struct AlertsView: View {
                 } label: {
                     Image(systemName: "list.star")
                 }
+                
+                Button {
+                    showSettings = true
+                } label: {
+                    Image(systemName: "gear")
+                }
             }
 
         }
         .navigationTitle("Alerts")
+        .sheet(isPresented: $showSettings) {
+            NavigationView { SettingsView(properties: Secrets.allCases) }
+        }
     }
 }
 
