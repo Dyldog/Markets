@@ -118,11 +118,11 @@ class ViewModel: NSObject, ObservableObject {
             
             DispatchQueue.main.async {
                 self.cookie = cookie
-                self.showLogin = self.cookie == nil
+                self.showLogin = cookie == nil || cookie?.values["c_user"] == nil
                 
-                if !self.showLogin {
+                if !self.showLogin, self.route == nil {
                     self.getRoute {
-                        self.getAlertItems()
+//                        self.getAlertItems()
                     }
                 }
             }

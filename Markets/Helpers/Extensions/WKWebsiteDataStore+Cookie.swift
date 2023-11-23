@@ -24,9 +24,11 @@ extension WKWebsiteDataStore {
         
         DispatchQueue.main.async {
             self.httpCookieStore.getAllCookies { cookies in
-                cookie = .init(values: cookies.reduce(into: [:], { partialResult, next in
-                    partialResult[next.name] = next.value
-                }))
+                if !cookies.isEmpty {
+                    cookie = .init(values: cookies.reduce(into: [:], { partialResult, next in
+                        partialResult[next.name] = next.value
+                    }))
+                }
                 group.leave()
             }
         }
