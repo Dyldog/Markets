@@ -33,7 +33,8 @@ class ViewModel: NSObject, ObservableObject {
     @Published var urlToShow: URL?
     @Published var alert: Alert?
     @Published var showLogin: Bool = false
-    @Published private var cookie: String?
+    @Published private var cookie: Cookie?
+    @Published private var route: String?
     @UserDefaultable(key: DefaultKeys.pastSearches) private(set) var pastSearches: [String] = ["Plants", "Tools"]
     @Published private(set) var isLoading: Bool = false
     @Published private(set) var showFreeOnly: Bool = true
@@ -60,6 +61,15 @@ class ViewModel: NSObject, ObservableObject {
     
     override init() {
         super.init()
+    }
+    
+    private func getRoute(completion: @escaping () -> Void) {
+        self.client.makeRequest(MarketplaceRequest.routeDefinitions(cookie: cookie!), for: MarketplaceRoutes.self).sink {
+            print($0)
+        } receiveValue: {
+            self.route = $0.route
+            completion()
+        }.store(in: &self.cancellables)
     }
     
     private func login() {
@@ -105,10 +115,16 @@ class ViewModel: NSObject, ObservableObject {
         let store = WKWebsiteDataStore.default()
         Task {
             let cookie = store.marketPlaceCookie()
+            
             DispatchQueue.main.async {
                 self.cookie = cookie
                 self.showLogin = self.cookie == nil
-                self.getAlertItems()
+                
+                if !self.showLogin {
+                    self.getRoute {
+                        self.getAlertItems()
+                    }
+                }
             }
         }
     }
@@ -179,10 +195,15 @@ class ViewModel: NSObject, ObservableObject {
     }
     
     private func getItems(for query: String, freeOnly: Bool, page: MarketplaceSearchResponse.PageInfo?) -> AnyPublisher<([MarketplaceSearchResponse.Node], MarketplaceSearchResponse.PageInfo), APIError>? {
-        guard let cookie = cookie else { login(); return nil }
+        guard let cookie = cookie, let route = route else { login(); return nil }
         
         return client.makeRequest(
-            MarketplaceRequest.search(query, page: page, cookie: cookie), for: MarketplaceSearchResponse.self
+            MarketplaceRequest.search(
+                query,
+                page: page,
+                cookie: cookie,
+                route: route
+            ), for: MarketplaceSearchResponse.self
         ).map {
             (
                 $0.data.marketplace_search.feed_units.edges.map { $0.node },

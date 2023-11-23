@@ -68,6 +68,16 @@ class APIClient {
     func makeRequest<T: Decodable>(_ request: APIRequest, for type: T.Type) -> AnyPublisher<T, APIError> {
         URLSession.shared.dataTaskPublisher(for: request.request).tryMap { data, response in
             do {
+                var data = data
+                
+                let comps = data.string.components(separatedBy: "for (;;);").compactMap {
+                    $0.isEmpty ? nil : $0
+                }
+                
+                if comps.count > 1 {
+                    data = ("[" + comps.joined(separator: ",") + "]").data(using: .utf8)!
+                }
+                
                 let value = try JSONDecoder().decode(type, from: data)
                 return value
             } catch {
