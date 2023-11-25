@@ -13,7 +13,7 @@ enum MarketplaceRequest: APIRequest {
     var headers: [String : String]? {
         switch self {
         case let .search(_, _, cookie): return [
-        "Cookie": cookie
+            "Cookie": Secrets.Facebook.cookie
         ] }
     }
     

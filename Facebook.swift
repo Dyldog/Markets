@@ -8,15 +8,15 @@
 import Foundation
 
 enum Facebook {
+    static func sanitise(_ text: String) -> String {
+        text.addingPercentEncoding(
+            withAllowedCharacters: .alphanumerics
+                .union(NSCharacterSet(charactersIn: "_.") as CharacterSet)
+        )!
+    }
+    
     private static func variables(_ query: String, with page: MarketplaceSearchResponse.PageInfo?) -> String {
-        func sanitise(_ text: String) -> String {
-            text.addingPercentEncoding(
-                withAllowedCharacters: .alphanumerics
-                    .union(NSCharacterSet(charactersIn: "_.") as CharacterSet)
-            )!
-        }
-        
-        if let page = page {
+       if let page = page {
             return sanitise(Secrets.Facebook.marketplaceVariablesOtherPages(
                 page.end_cursor.replacingOccurrences(of: "\"", with: "\\\""),
                 query
@@ -28,6 +28,6 @@ enum Facebook {
         
     static func marketplaceQuery(_ query: String, page: MarketplaceSearchResponse.PageInfo?) -> String {
         return Secrets.Facebook.marketplaceQuery(variables(query, with: page))
-                .replacingOccurrences(of: "\n", with: "&")
+//                .replacingOccurrences(of: "\n", with: "&")
     }
 }

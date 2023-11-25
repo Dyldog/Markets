@@ -24,7 +24,11 @@ protocol APIRequest {
 
 extension Encodable {
     func encode() -> Data {
-        try! JSONEncoder().encode(self)
+        if let self = self as? String {
+            return self.data(using: .utf8)!
+        } else {
+            return try! JSONEncoder().encode(self)
+        }
     }
 }
 
@@ -68,6 +72,14 @@ class APIClient {
     func makeRequest<T: Decodable>(_ request: APIRequest, for type: T.Type) -> AnyPublisher<T, APIError> {
         URLSession.shared.dataTaskPublisher(for: request.request).tryMap { data, response in
             do {
+                var data = data
+                                
+                let comps = data.string.components(separatedBy: "\n").compactMap {
+                    $0.isEmpty ? nil : $0
+                }
+                
+                data = comps[0].data(using: .utf8)!
+                
                 let value = try JSONDecoder().decode(type, from: data)
                 return value
             } catch {
