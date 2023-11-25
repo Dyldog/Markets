@@ -64,6 +64,7 @@ class ViewModel: NSObject, ObservableObject {
     }
     
     private func getRoute(completion: @escaping () -> Void) {
+        guard Secrets.doc_id.value.isEmpty else { return completion() }
         self.client.makeRequest(MarketplaceRequest.routeDefinitions(cookie: cookie!), for: MarketplaceRoutes.self).sink {
             print($0)
         } receiveValue: {
@@ -195,7 +196,11 @@ class ViewModel: NSObject, ObservableObject {
     }
     
     private func getItems(for query: String, freeOnly: Bool, page: MarketplaceSearchResponse.PageInfo?) -> AnyPublisher<([MarketplaceSearchResponse.Node], MarketplaceSearchResponse.PageInfo), APIError>? {
-        guard let cookie = cookie, let route = route else { login(); return nil }
+        let route = route ?? Secrets.doc_id.value
+        guard
+            let cookie = cookie,
+            !route.isEmpty
+        else { login(); return nil }
         
         return client.makeRequest(
             MarketplaceRequest.search(

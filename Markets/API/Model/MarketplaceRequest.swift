@@ -13,7 +13,23 @@ enum MarketplaceRequest: APIRequest {
     var headers: [String : String]? {
         switch self {
         case let .search(_, _, cookie, _), let .routeDefinitions(cookie): return [
-            "Cookie": cookie.string
+            "Host": "www.facebook.com",
+            "Accept": "*/*",
+            "X-FB-LSD": "_CTdkG1o7COruGY2kyhemQ",
+            "X-ASBD-ID": "129477",
+            "X-FB-Friendly-Name": "CometMarketplaceSearchContentContainerQuery",
+            "Sec-Fetch-Site": "same-origin",
+            "Accept-Language": "en-AU,en;q=0.9",
+            "Accept-Encoding": "gzip, deflate, br",
+            "Sec-Fetch-Mode": "cors",
+            "Content-Type": "application/x-www-form-urlencoded",
+            "Origin": "https://www.facebook.com",
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Safari/605.1.15",
+            "Referer": "https://www.facebook.com/marketplace/melbourne/search?query=BOOP",
+            "Content-Length": "2466",
+            "Connection": "keep-alive",
+            "Sec-Fetch-Dest": "empty",
+            "Cookie": "\(cookie.string)"
         ] }
     }
     

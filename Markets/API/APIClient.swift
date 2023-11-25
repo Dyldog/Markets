@@ -24,7 +24,11 @@ protocol APIRequest {
 
 extension Encodable {
     func encode() -> Data {
-        try! JSONEncoder().encode(self)
+        if let self = self as? String {
+            return self.data(using: .utf8)!
+        } else {
+            return try! JSONEncoder().encode(self)
+        }
     }
 }
 
