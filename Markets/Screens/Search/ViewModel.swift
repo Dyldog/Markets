@@ -33,7 +33,7 @@ class ViewModel: NSObject, ObservableObject {
     @Published var urlToShow: URL?
     @Published var alert: Alert?
     @Published var showLogin: Bool = false
-    @Published private var cookie: String?
+    @Published private var cookie: Cookie?
     @UserDefaultable(key: DefaultKeys.pastSearches) private(set) var pastSearches: [String] = ["Plants", "Tools"]
     @Published private(set) var isLoading: Bool = false
     @Published private(set) var showFreeOnly: Bool = true

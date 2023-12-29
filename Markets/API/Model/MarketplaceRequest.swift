@@ -13,7 +13,7 @@ enum MarketplaceRequest: APIRequest {
     var headers: [String : String]? {
         switch self {
         case let .search(_, _, cookie): return [
-            "Cookie": Secrets.Facebook.cookie
+            "Cookie": cookie.string
         ] }
     }
     
@@ -27,14 +27,14 @@ enum MarketplaceRequest: APIRequest {
     
     var body: Encodable? {
         switch self {
-        case let .search(query, page, _): 
+        case let .search(query, page, cookie):
             let b = Facebook.marketplaceQuery(
-                query.addingPercentEncoding(withAllowedCharacters: .urlFragmentAllowed)!, page: page
+                query.addingPercentEncoding(withAllowedCharacters: .urlFragmentAllowed)!, cookie: cookie, page: page
             )
             return b
         }
         
     }
     
-    case search(String, page: MarketplaceSearchResponse.PageInfo?, cookie: String)
+    case search(String, page: MarketplaceSearchResponse.PageInfo?, cookie: Cookie)
 }

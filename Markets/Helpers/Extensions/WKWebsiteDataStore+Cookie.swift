@@ -7,16 +7,26 @@
 
 import WebKit
 
+struct Cookie {
+    let values: [String: String]
+    
+    var string: String {
+        values.map { "\($0.key)=\($0.value)"}.joined(separator: "; ")
+    }
+}
+
 extension WKWebsiteDataStore {
-    func marketPlaceCookie() -> String? {
+    func marketPlaceCookie() -> Cookie? {
         let group = DispatchGroup()
         
-        var cookie: String?
+        var cookie: Cookie?
         group.enter()
         
         DispatchQueue.main.async {
             self.httpCookieStore.getAllCookies { cookies in
-                cookie = cookies.map { "\($0.name)=\($0.value)"}.joined(separator: "; ")
+                cookie = .init(values: cookies.reduce(into: [:], { partialResult, next in
+                    partialResult[next.name] = next.value
+                }))
                 group.leave()
             }
         }
@@ -28,10 +38,10 @@ extension WKWebsiteDataStore {
 }
 
 extension WKWebView {
-    var marketPlaceCookie: String? {
+    var marketPlaceCookie: Cookie? {
         let group = DispatchGroup()
         
-        var cookie: String?
+        var cookie: Cookie?
         group.enter()
         
         DispatchQueue.main.async {
