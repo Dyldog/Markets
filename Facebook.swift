@@ -117,12 +117,13 @@ enum Facebook {
     }
     
     static func marketplaceQuery(_ query: String, cookie: Cookie, page: MarketplaceSearchResponse.PageInfo?) -> String {
-        return """
-        av=\(cookie.values["c_user"]!)
-        fb_dtsg=\(Secrets.fb_dtsg)
-        variables=\(variables(query, with: page))
-        doc_id=\(Secrets.doc_id)
-        """
-            .replacingOccurrences(of: "\n", with: "&")
+		return [
+			cookie.values["c_user"].map { "av=\($0)" },
+			"fb_dtsg=\(Secrets.fb_dtsg)",
+			"variables=\(variables(query, with: page))",
+			"doc_id=\(Secrets.doc_id)"
+		]
+			.compactMap { $0 }
+			.joined(separator: "&")
     }
 }

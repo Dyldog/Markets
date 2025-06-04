@@ -73,6 +73,8 @@ class APIClient {
         URLSession.shared.dataTaskPublisher(for: request.request).tryMap { data, response in
             do {
                 var data = data
+				
+				guard data.count > 0 else { throw APIError.unknown }
                                 
                 let comps = data.string.components(separatedBy: "\n").compactMap {
                     $0.isEmpty ? nil : $0
